@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ninja Games</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body {
+    margin:0;
+    font-family:'DM Sans',sans-serif;
+    background:#f4f4f4 url('background.png') no-repeat center center fixed;
+    background-size:cover;
+    overflow:hidden;
+}
+header {
+    padding:5px 15px;
+    background:#222;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    height:60px;
+}
+#logo { height:80px; object-fit:contain; cursor:pointer; }
+#searchBar { padding:6px; width:200px; border-radius:5px; border:none; }
+#container { padding:20px; height:calc(100vh - 60px); overflow-y:auto; }
+.section { margin-bottom:30px; }
+.section h3 { color:white; margin-bottom:10px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:15px; }
+.card {
+    background-size:cover;
+    background-position:center;
+    color:white;
+    padding:10px;
+    border-radius:0;
+    border:1px solid black;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    cursor:pointer;
+    transition:0.2s;
+    text-align:center;
+    height:75px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:500;
+}
+.card:hover{ transform:scale(1.05); }
+.gameContainer { display:flex; flex-direction:column; height:100vh; }
+.gameBar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:5px 15px;
+    background:#222;
+    color:white;
+    flex-shrink:0;
+}
+.gameBar .controls { display:flex; gap:10px; }
+.gameFrame {
+    border:none;
+    width:100%;
+    flex-grow:1;
+}
+.clock { text-align:center; font-weight:500; }
+</style>
+</head>
+<body>
+<header>
+    <img src="logo.png" alt="Game Hub" id="logo">
+    <input id="searchBar" placeholder="Search games...">
+</header>
+
+<div id="container"></div>
+
+<script>
+const container = document.getElementById("container");
+const header = document.querySelector("header");
+
+// Categories and games
+const categories = {
+"Sports":[
+{title:"Retro Bowl",url:"https://hello1405.github.io/retrobowl/"},
+{title:"Basketball Stars",url:"https://1kh0.github.io/projects/basketball-stars/index.html"},
+{title:"A Small World Cup",url:"https://goatedcoder360.github.io/asmallworldcup/"},
+{title:"Soccer Skills",url:"https://gameinclassroom.github.io/soccer-skills-world-cup/"},
+{title:"Basket Random",url:"https://3kh0s.github.io/games/basketrandom/index.html"},
+{title:"Soccer Random",url:"https://3kh0s.github.io/games/soccerrandom/index.html"},
+{title:"Volleyball Random",url:"https://3kh0s.github.io/games/volleyrandom/index.html"},
+{title:"Boxing Random",url:"https://3kh0s.github.io/games/boxingrandom/index.html"}
+],
+"Action":[
+{title:"Stickman RPG",url:"https://goatedcoder360.github.io/stickman-RPG/"},
+{title:"Chrome Dino",url:"https://games-site.github.io/projects/chrome-dino/index.html"},
+{title:"Tunnel Rush",url:"https://3kh0s.github.io/games/tunnelrush/index.html"},
+{title:"Death Run 3D",url:"https://games-site.github.io/projects/death-run-3d/index.html"},
+{title:"Time Shooter 2",url:"https://eagx.github.io/TS2/"},
+{title:"Paper.io",url:"https://1kh0.github.io/projects/paperio2/index.html"},
+{title:"YoHoHo.io",url:"https://3kh0s.github.io/games/yohoho/index.html"},
+{title:"Hexanaut.io",url:"https://hexanaut.io/"},
+{title:"Snowball.io",url:"https://3kh0s.github.io/games/snowbattleio/index.html"},
+{title:"Subway Surfers",url:"https://hello1405.github.io/subway-surfers-ny/"},
+{title:"Pac Man",url:"https://goatedcoder360.github.io/pacman/"},
+{title:"SoFlo Wheelie Life",url:"https://scratch.mit.edu/projects/1226052197/embed"},
+{title:"Sandboxels",url:"https://goatedcoder360.github.io/sandboxels/"},
+{title:"Minecraft",url:"https://1kh0.github.io/projects/minecraft/index.html"},
+{title:"Slope",url:"https://hello1405.github.io/slope/"},
+{title:"PolyTrack",url:"https://joe-the-chicken.github.io/polytrack/"},
+{title:"Flappy Bird",url:"https://1kh0.github.io/projects/flappy-bird/index.html"},
+{title:"Stack",url:"https://1kh0.github.io/projects/stack/index.html"},
+{title:"Idle Breakout",url:"https://games-site.github.io/projects/idle-breakout/frame.html"}
+],
+"Strategy":[
+{title:"Cookie Clicker",url:"https://goatedcoder360.github.io/cookieclicker/"},
+{title:"Pandemic 2",url:"https://goatedcoder360.github.io/pandemic2/"},
+{title:"The Final Earth",url:"https://1kh0.github.io/projects/the-final-earth/index.html"},
+{title:"Papas Wingeria",url:"https://ubg89.github.io/PapasWingeria/"},
+{title:"Papas Pancakeria",url:"https://3kh0s.github.io/games/papaspancakeria/index.html"},
+{title:"Papas Sushiria",url:"https://3kh0s.github.io/games/papassushiria/index.html"},
+{title:"Papas Pizzaria",url:"https://1kh0.github.io/projects/papaspizzaria/index.html"},
+{title:"Papas Donuteria",url:"https://3kh0s.github.io/games/papasdonuteria/index.html"},
+{title:"Papas Taco Mia",url:"https://3kh0s.github.io/games/papastacomia/index.html"}
+],
+"Brain":[
+{title:"The Impossible Quiz",url:"https://3kh0s.github.io/games/theimpossiblequiz/index.html"},
+{title:"Google Feud",url:"https://hello1405.github.io/3kh0-assets-main-google-feud/3kh0-assets-main-google-feud/google-feud/"},
+{title:"Wordle",url:"https://bosorioo.github.io/wordle-unlimited/"},
+{title:"2048",url:"https://3kh0s.github.io/games/2048/index.html"}
+],
+"Apps":[
+{title:"Youtube",url:"https://goatedcoder360.github.io/youtube/"},
+{title:"Sports Center",url:"https://goatedcoder360.github.io/SportsCenter/"}
+]
+};
+
+// Set specific text colors
+const blackTextGames = [
+"Chrome Dino","Volleyball Random","Basket Random","Soccer Random","Time Shooter 2","Paper.io",
+"Hexanaut.io","Snowball.io","PolyTrack","Stack","Idle Breakout","Papas Wingeria","Papas Pancakeria",
+"Papas Sushiria","The Impossible Quiz","Google Feud","2048","Youtube"
+];
+const skyBlueTextGames = ["Death Run 3D"];
+
+function createCard(game){
+    const div=document.createElement("div");
+    div.className="card";
+    div.style.backgroundImage = `url('${game.title.toLowerCase().replace(/\s/g,'')}.png')`;
+    div.textContent=game.title;
+    if(blackTextGames.includes(game.title)) div.style.color="black";
+    if(skyBlueTextGames.includes(game.title)) div.style.color="skyblue";
+    div.onclick = ()=>openGame(game);
+    return div;
+}
+
+function renderHome(){
+    header.style.display="flex";
+    container.innerHTML="";
+    for(const cat in categories){
+        const section = document.createElement("div");
+        section.className="section";
+        section.innerHTML = `<h3>${cat}</h3>`;
+        const grid = document.createElement("div");
+        grid.className="grid";
+        categories[cat].forEach(g=>grid.appendChild(createCard(g)));
+        section.appendChild(grid);
+        container.appendChild(section);
+    }
+}
+
+function openGame(game){
+    header.style.display="none";
+    container.innerHTML="";
+    const gameContainer = document.createElement("div");
+    gameContainer.className="gameContainer";
+
+    const gameBar = document.createElement("div");
+    gameBar.className="gameBar";
+
+    const controls = document.createElement("div");
+    controls.className="controls";
+
+    const back = document.createElement("span");
+    back.textContent="←";
+    back.style.cursor="pointer";
+    back.onclick=renderHome;
+
+    const fullscreen = document.createElement("span");
+    fullscreen.textContent="⛶";
+    fullscreen.style.cursor="pointer";
+
+    const iframe = document.createElement("iframe");
+    iframe.src = game.url;
+    iframe.className = "gameFrame";
+
+    fullscreen.onclick = ()=>iframe.requestFullscreen?.();
+
+    controls.appendChild(back);
+    controls.appendChild(fullscreen);
+    gameBar.appendChild(controls);
+
+    const clock = document.createElement("div");
+    clock.className="clock";
+    function updateTime(){
+        const now = new Date();
+        let h = now.getHours();
+        const m = now.getMinutes();
+        const ampm = h>=12?"PM":"AM";
+        h = h%12||12;
+        clock.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')} ${ampm}`;
+    }
+    updateTime();
+    setInterval(updateTime,60000);
+    gameBar.appendChild(clock);
+
+    const logo = document.createElement("img");
+    logo.src="logo.png";
+    logo.style.height="40px";
+    logo.style.cursor="pointer";
+    logo.onclick = ()=>{ iframe.src = game.url };
+
+    gameBar.appendChild(logo);
+    gameContainer.appendChild(gameBar);
+    gameContainer.appendChild(iframe);
+    container.appendChild(gameContainer);
+}
+
+// Search functionality
+const searchBar = document.getElementById("searchBar");
+searchBar.addEventListener("input",()=>{
+    const q = searchBar.value.toLowerCase();
+    const results = [];
+    for(const cat in categories){
+        categories[cat].forEach(g=>{
+            if(g.title.toLowerCase().includes(q)) results.push(g);
+        });
+    }
+    container.innerHTML="";
+    if(q==="") return renderHome();
+    const grid = document.createElement("div");
+    grid.className="grid";
+    results.forEach(g=>grid.appendChild(createCard(g)));
+    container.appendChild(grid);
+});
+
+// Clicking the main logo returns home
+document.getElementById("logo").onclick = renderHome;
+
+renderHome();
+</script>
+</body>
+</html>
